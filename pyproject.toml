@@ -16,6 +16,6 @@ dev = [
 ]
 
 [tool.poe.tasks]
-start = "uv run main.py"
+start = "uv run src/main.py"
 test = "pytest tests/"
 lint = "ruff check ."
