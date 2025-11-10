@@ -6,6 +6,7 @@ This module provides the command-line interface for running the graph analysis a
 import sys
 from typing import Dict, List, Optional
 from pathlib import Path
+from loguru import logger
 
 # Add the project root to the Python path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -23,14 +24,14 @@ def run_graph_agent(custom_graph: Optional[Dict[str, List[str]]] = None) -> None
         custom_graph: Optional dictionary representing the graph as an adjacency list.
                      If not provided, a default graph will be used.
     """
-    def print_messages(messages):
-        """Helper function to print messages in a readable format."""
+    def log_messages(messages):
+        """Helper function to log messages in a readable format."""
         if not messages:
             return
         
         for message in messages[-3:]:
             if hasattr(message, 'content') and hasattr(message, 'type') and message.type == 'tool':
-                print(f"\n🛠️ TOOL RESULT: {message.content}")
+                logger.info(f"🛠️ TOOL RESULT: {message.content}")
 
     # Use custom graph if provided, otherwise use default
     if custom_graph is None:
@@ -42,8 +43,8 @@ def run_graph_agent(custom_graph: Optional[Dict[str, List[str]]] = None) -> None
             'e': ['d']
         }
     
-    print("\n ===== GRAPH AGENT =====")
-    print(f"\nAnalyzing graph with {len(custom_graph)} nodes...")
+    logger.info("===== GRAPH AGENT =====")
+    logger.info(f"Analyzing graph with {len(custom_graph)} nodes...")
     
     # Initialize agent and tools
     tools = get_tools()
@@ -59,9 +60,9 @@ def run_graph_agent(custom_graph: Optional[Dict[str, List[str]]] = None) -> None
     # Run the agent
     for step in app.stream(state, stream_mode="values"):
         if "messages" in step:
-            print_messages(step["messages"])
+            log_messages(step["messages"])
     
-    print("\n ===== GRAPH ANALYSIS COMPLETE =====")
+    logger.info("===== GRAPH ANALYSIS COMPLETE =====")
 
 
 if __name__ == "__main__":

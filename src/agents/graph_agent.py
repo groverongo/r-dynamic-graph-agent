@@ -1,5 +1,6 @@
 """Graph Agent implementation."""
 from typing import Dict, Any, List
+from loguru import logger
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from ..config.settings import settings
@@ -40,15 +41,16 @@ class GraphAgent:
             user_message = HumanMessage(content=user_input)
         else:
             user_input = input("\nWhat else would you like to know about the graph? ")
-            print(f"\n👤 USER: {user_input}")
+            logger.info(f"👤 USER: {user_input}")
             user_message = HumanMessage(content=user_input)
         
         all_messages = [system_prompt] + list(state["messages"]) + [user_message]
         response = self.llm.invoke(all_messages)
         
-        print(f"\n🤖 AI: {response.content}")
+        logger.info(f"🤖 AI: {response.content}")
         if hasattr(response, "tool_calls") and response.tool_calls:
-            print(f"🔧 USING TOOLS: {[tc['name'] for tc in response.tool_calls]}")
+            tool_names = [tc['name'] for tc in response.tool_calls]
+            logger.debug(f"Using tools: {', '.join(tool_names)}")
         
         return {"messages": list(state["messages"]) + [user_message, response]}
     
